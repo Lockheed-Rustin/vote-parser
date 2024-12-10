@@ -80,7 +80,7 @@ fn print_result(votes: &HashMap<Group, (u32, HashSet<String>)>) {
             .sum::<u32>()
             / BOUGHT_COUNT
     ]);
-    table.add_row(row![]);
+    table.add_empty_row();
 
     table.add_row(row!["GROUP NAME", "ALIASES", "VOTE COUNT", "ALIASED"]);
     for (group, (vote_count, aliased)) in votes.iter() {
