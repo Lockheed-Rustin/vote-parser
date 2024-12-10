@@ -1,7 +1,7 @@
 use prettytable::{row, Table};
 use serde::Deserialize;
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     fs::{self, File},
     io::BufWriter,
 };
@@ -38,8 +38,16 @@ fn parse_group_name(vote: &str) -> String {
         .to_string()
 }
 
-fn parse_votes(groups: &Groups, votes: &str) -> HashMap<Group, (u32, HashSet<String>)> {
-    let mut result = HashMap::new();
+fn parse_votes(groups: &Groups, votes: &str) -> HashMap<Group, (u32, Vec<String>)> {
+    let mut result = groups
+        .group
+        .iter()
+        .cloned()
+        .map(|g| (g, (0, Vec::new())))
+        .collect::<HashMap<_, _>>();
+    for group in groups.group.iter().cloned() {
+        result.insert(group, (0, Vec::new()));
+    }
 
     for vote_message in votes.split("> ").skip(1) {
         let lines = vote_message.trim().lines().skip(2);
@@ -57,16 +65,18 @@ fn parse_votes(groups: &Groups, votes: &str) -> HashMap<Group, (u32, HashSet<Str
                 })
                 .unwrap()
                 .clone();
-            let entry: &mut (u32, HashSet<String>) = result.entry(group).or_default();
+            let entry = result.entry(group).or_default();
             entry.0 += 1;
-            entry.1.insert(aliased);
+            if !entry.1.contains(&aliased) {
+                entry.1.push(aliased);
+            }
         }
     }
 
     result
 }
 
-fn print_result(votes: &HashMap<Group, (u32, HashSet<String>)>) {
+fn print_result(votes: &HashMap<Group, (u32, Vec<String>)>) {
     let file = File::create("votes.md").unwrap();
     let mut buff = BufWriter::new(file);
 
@@ -87,7 +97,7 @@ fn print_result(votes: &HashMap<Group, (u32, HashSet<String>)>) {
     let mut table = Table::new();
     table.add_row(row!["GROUP NAME", "ALIASES", "VOTE COUNT", "ALIASED"]);
     for (group, (vote_count, aliased)) in votes.iter() {
-        let aliased = aliased.iter().cloned().collect::<Vec<_>>().join(", ");
+        let aliased = aliased.join(", ");
         let aliases = group
             .aliases
             .iter()
