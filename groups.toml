@@ -44,6 +44,7 @@ name = "Better Call Drone!"
 
 [[group]]
 name = "Rustafarian"
+aliases = ["Rustafarian Drones"]
 
 [[group]]
 name = "In God (and Rust) We Trust"
