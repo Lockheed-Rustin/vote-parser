@@ -67,11 +67,13 @@ fn parse_votes(groups: &Groups, votes: &str) -> HashMap<Group, (u32, HashSet<Str
 }
 
 fn print_result(votes: &HashMap<Group, (u32, HashSet<String>)>) {
+    let file = File::create("votes.md").unwrap();
+    let mut buff = BufWriter::new(file);
+
     let mut votes = votes.iter().collect::<Vec<_>>();
     votes.sort_by(|a, b| b.1 .0.cmp(&a.1 .0));
 
     let mut table = Table::new();
-
     table.add_row(row!["VOTES COUNT"]);
     table.add_row(row![
         votes
@@ -80,8 +82,9 @@ fn print_result(votes: &HashMap<Group, (u32, HashSet<String>)>) {
             .sum::<u32>()
             / BOUGHT_COUNT
     ]);
-    table.add_empty_row();
+    table.print_html(&mut buff).unwrap();
 
+    let mut table = Table::new();
     table.add_row(row!["GROUP NAME", "ALIASES", "VOTE COUNT", "ALIASED"]);
     for (group, (vote_count, aliased)) in votes.iter() {
         let aliased = aliased.iter().cloned().collect::<Vec<_>>().join(", ");
@@ -94,9 +97,6 @@ fn print_result(votes: &HashMap<Group, (u32, HashSet<String>)>) {
             .join(", ");
         table.add_row(row![group.name, aliases, vote_count, aliased]);
     }
-
-    let file = File::create("votes.md").unwrap();
-    let mut buff = BufWriter::new(file);
 
     table.print_html(&mut buff).unwrap();
     table.printstd();
