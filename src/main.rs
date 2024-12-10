@@ -74,14 +74,14 @@ fn print_result(votes: &HashMap<Group, (u32, HashSet<String>)>) {
     votes.sort_by(|a, b| b.1 .0.cmp(&a.1 .0));
 
     let mut table = Table::new();
-    table.add_row(row!["VOTES COUNT"]);
-    table.add_row(row![
-        votes
-            .iter()
-            .map(|(_, (vote_count, _))| *vote_count)
-            .sum::<u32>()
-            / BOUGHT_COUNT
-    ]);
+    let votes_count = votes
+        .iter()
+        .map(|(_, (vote_count, _))| *vote_count)
+        .sum::<u32>()
+        / BOUGHT_COUNT;
+    let yet_to_vote = votes.len() as u32 - votes_count;
+    table.add_row(row!["VOTES COUNT", "YET TO VOTE"]);
+    table.add_row(row![votes_count, yet_to_vote]);
     table.print_html(&mut buff).unwrap();
 
     let mut table = Table::new();
