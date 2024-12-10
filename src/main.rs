@@ -95,7 +95,7 @@ fn print_result(votes: &HashMap<Group, (u32, HashSet<String>)>) {
         table.add_row(row![group.name, aliases, vote_count, aliased]);
     }
 
-    let file = File::create("votes.html").unwrap();
+    let file = File::create("votes.md").unwrap();
     let mut buff = BufWriter::new(file);
 
     table.print_html(&mut buff).unwrap();
